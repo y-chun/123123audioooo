@@ -1,0 +1,130 @@
+.audio-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.audio-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  width: 750rpx;
+  height: 48rpx;
+}
+
+.audio-tab {
+  margin-left: 80rpx;
+  font-size: 32rpx;
+  line-height: 48rpx;
+  height: 48rpx;
+}
+
+.audio-tab-line {
+  border-bottom: 4rpx solid #bcb9fe;
+}
+
+.audio-tab-first {
+  margin-left: 0;
+}
+
+.audio-media {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  margin-top: 68rpx;
+  width: 750rpx;
+  height: 658rpx;
+  /* background-image: url("../../images/background@3x.png") */
+}
+
+.audio-media-bg {
+  position: absolute;
+  width: 750rpx;
+  height: 658rpx;
+}
+
+.audio-image-box {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  width: 476rpx;
+  height: 476rpx;
+}
+
+.cd-bg {
+  position: absolute;
+  width: 476rpx;
+  height: 476rpx;
+  z-index: 0;
+}
+
+.audio-cover {
+  position: relative;
+  z-index: 1;
+  border-radius: 50%;
+  width: 336rpx;
+  height: 336rpx;
+}
+
+.audio-name {
+  margin-top: 40rpx;
+  width: 400rpx;
+  font-size: 42rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.audio-detail {
+  margin-top: 24rpx;
+  width: 550rpx;
+  font-size: 28rpx;
+  color: #a894ff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.audio-operation-box {
+  display: flex;
+  flex-direction: row;
+  padding: 0 122rpx;
+  height: 200rpx;
+}
+
+.audio-operation {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.audio-model {
+  width: 72rpx;
+  height: 72rpx;
+}
+
+.audio-operation-btn {
+  position: relative;
+  top: 4px;
+  left: 4px;
+  width: 92px;
+  height: 92px;
+}
+
+.audio-load {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  width: 750rpx;
+  height: 64rpx;
+}
+
+.load-image {
+  width: 64rpx;
+  height: 64rpx;
+}

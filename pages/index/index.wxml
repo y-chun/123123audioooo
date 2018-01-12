@@ -1,0 +1,38 @@
+<!--pages/video/video.wxml-->
+<!-- <text>pages/video/video.wxml</text> -->
+
+<view class="audio-container">
+  <view class="audio-header">
+    <!-- <view class="audio-tab audio-tab-line audio-tab-first">儿歌</view>
+    <view class="audio-tab">精选</view>
+    <view class="audio-tab">故事</view> -->
+    <view class="audio-tab,{{idx==0?'audio-tab-first':null}}"  wx:for="{{tabs}}" wx:for-item="itemName" wx:for-index="idx" wx:key="{{idx}}">
+    {{itemName.name}}
+    </view>
+  </view>
+  <view class="audio-media">
+    <image src="../../images/background.png" class="audio-media-bg"></image>
+    <view class="audio-image-box" animation="{{animation}}">
+      <image src="../../images/cd_bg.png" class="cd-bg"></image>
+      <image src="{{playImg}}"class="audio-cover"></image>
+    </view>
+    <view class="audio-name">{{playCnName}}</view>
+    <view class="audio-detail">{{playEnName}}</view>
+  </view>
+  <view class="audio-load">
+    <image src="../../images/load.gif" class="load-image"></image>
+  </view>
+  <view class="audio-operation-box">
+    <view class="audio-operation">
+      <image src="../../images/list_icon.png" class="audio-model" wx:if="{{model==='list'}}" bindtap="switchOne"></image>
+      <image src="../../images/single_icon.png" class="audio-model" wx:if="{{model==='one'}}" bindtap="switchList"></image>
+      <!-- <image src="../../images/play_icon.png" ></image> -->
+        <canvas class="cir" style="width:100px; height:100px;position:relative;" canvas-id="canvasArc">
+           <cover-image class="audio-operation-btn" src="../../images/play_icon.png"  bindtap="play" hidden="{{play}}"/> 
+           <cover-image class="audio-operation-btn" src="../../images/pause_icon.png"  bindtap="pause"  hidden="{{!play}}"/> 
+        </canvas>  
+      <image src="../../images/next_icon.png" class="audio-model" bindtap="next"></image>
+    </view>
+  </view>
+   <!-- <audio controls id="audio"></audio>  -->
+</view>
