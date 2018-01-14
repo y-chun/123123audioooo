@@ -6,7 +6,7 @@
     <!-- <view class="audio-tab audio-tab-line audio-tab-first">儿歌</view>
     <view class="audio-tab">精选</view>
     <view class="audio-tab">故事</view> -->
-    <view class="audio-tab,{{idx==0?'audio-tab-first':null}}"  wx:for="{{tabs}}" wx:for-item="itemName" wx:for-index="idx" wx:key="{{idx}}">
+    <view class="audio-tab,{{idx==0?'audio-tab-first':null}},{{itemName.id===choose?'audio-tab-line':null}}"  wx:for="{{tabs}}" wx:for-item="itemName" wx:for-index="idx" wx:key="{{idx}}" bindtap="tabsAlbum" data-id="{{itemName.id}}">
     {{itemName.name}}
     </view>
   </view>
@@ -20,12 +20,17 @@
     <view class="audio-detail">{{playEnName}}</view>
   </view>
   <view class="audio-load">
-    <image src="../../images/load.gif" class="load-image"></image>
+    <view class="audio-load-ele" wx:if="{{audioLoad}}">
+      <image src="../../images/load.gif" class="load-image"></image>
+      <view class="audio-load-text">加载中</view>
+    </view>
   </view>
   <view class="audio-operation-box">
     <view class="audio-operation">
-      <image src="../../images/list_icon.png" class="audio-model" wx:if="{{model==='list'}}" bindtap="switchOne"></image>
-      <image src="../../images/single_icon.png" class="audio-model" wx:if="{{model==='one'}}" bindtap="switchList"></image>
+      <view class="audio-model audio-model-box">
+        <image src="../../images/list_icon.png" class="audio-model audio-model-tab" hidden="{{model==='list'}}" bindtap="switchOne"></image>
+        <image src="../../images/single_icon.png" class="audio-model audio-model-tab" hidden="{{model==='one'}}" bindtap="switchList"></image>
+      </view>
       <!-- <image src="../../images/play_icon.png" ></image> -->
         <canvas class="cir" style="width:100px; height:100px;position:relative;" canvas-id="canvasArc">
            <cover-image class="audio-operation-btn" src="../../images/play_icon.png"  bindtap="play" hidden="{{play}}"/> 
