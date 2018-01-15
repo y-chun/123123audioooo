@@ -22,22 +22,21 @@
   <view class="audio-load">
     <view class="audio-load-ele" wx:if="{{audioLoad}}">
       <image src="../../images/load.gif" class="load-image"></image>
-      <view class="audio-load-text">加载中</view>
+      <view class="audio-load-text">加载中...</view>
     </view>
   </view>
   <view class="audio-operation-box">
     <view class="audio-operation">
-      <view class="audio-model audio-model-box">
-        <image src="../../images/list_icon.png" class="audio-model audio-model-tab" hidden="{{model==='list'}}" bindtap="switchOne"></image>
-        <image src="../../images/single_icon.png" class="audio-model audio-model-tab" hidden="{{model==='one'}}" bindtap="switchList"></image>
-      </view>
+
+        <image src="../../images/list_icon.png" class="audio-model" wx:if="{{model==='list'}}" bindtap="switchOne"></image>
+        <image src="../../images/single_icon.png" class="audio-model" wx:if="{{model==='one'}}" bindtap="switchList"></image>
       <!-- <image src="../../images/play_icon.png" ></image> -->
         <canvas class="cir" style="width:100px; height:100px;position:relative;" canvas-id="canvasArc">
-           <cover-image class="audio-operation-btn" src="../../images/play_icon.png"  bindtap="play" hidden="{{play}}"/> 
+           <cover-image class="audio-operation-btn" src="../../images/play_icon.png"  bindtap="playAction" hidden="{{play}}"/> 
            <cover-image class="audio-operation-btn" src="../../images/pause_icon.png"  bindtap="pause"  hidden="{{!play}}"/> 
         </canvas>  
       <image src="../../images/next_icon.png" class="audio-model" bindtap="next"></image>
     </view>
   </view>
-   <!-- <audio controls id="audio"></audio>  -->
+    <!-- <audio controls id="audio" hidden></audio>   -->
 </view>

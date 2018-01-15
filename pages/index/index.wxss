@@ -93,6 +93,7 @@
 .audio-operation-box {
   display: flex;
   flex-direction: row;
+  margin-top:30rpx;
   padding: 0 122rpx;
   height: 200rpx;
 }
