@@ -34,8 +34,37 @@ Page({
       }
     })
     this.getList();
-  },
 
+    backgroundAudioManager.onEnded(this.endNext);
+    backgroundAudioManager.onPause(this.listenPause);
+    backgroundAudioManager.onWaiting(this.listenWaiting);
+    backgroundAudioManager.onError(this.listenError)
+    backgroundAudioManager.onTimeUpdate(() => {
+      this.setData({
+        time: Math.floor(backgroundAudioManager.duration),
+        audioLoad: false
+      })
+      this.drawCircle();
+      // console.log(waiting)
+      clearTimeout(waiting)
+    })
+
+
+    backgroundAudioManager.onPlay(() => {
+      // this.drawCircle()
+      console.log(123);
+      this.stopAnimate();
+      this.loopRotate();
+    })
+    // backgroundAudioManager.onCanplay(() => {
+    //   console.log(backgroundAudioManager.duration)
+    // })
+    this.startAnimate()
+  },
+  listenError(errCode){
+    console.log(errCode)
+    // let
+  },
   listenNetworkStatusChange(params){
     const { isConnected, networkType} = params;
     if (!isConnected){
@@ -130,18 +159,21 @@ Page({
       let drawStep  = backgroundAudioManager.currentTime;
       var n = this.data.time;
       if (drawStep <= n) {
+        console.log(drawStep)
           endAngle = drawStep * 2 * Math.PI / n + 1.5 * Math.PI;
-        
-        this.setData({
-          drawStep: drawStep+1
-        });
+          drawArc(startAngle, endAngle);  
+        // this.setData({
+        //   drawStep: drawStep+1
+        // });
       } else {
         clearInterval(varName);
       }
     };
     if (defualt){
+      // console.log(1)
       drawArc(startAngle, startAngle);
     }else{
+      // console.log(2)
       animation();
     }
     
@@ -150,40 +182,12 @@ Page({
     backgroundAudioManager.pause()
   },
   onShow(e) {
-
-    backgroundAudioManager.onEnded(this.endNext);
-    backgroundAudioManager.onPause(this.listenPause); 
-    backgroundAudioManager.onWaiting(this.listenWaiting); 
-    backgroundAudioManager.onError(this.listenError)
-    backgroundAudioManager.onTimeUpdate(()=>{
-      this.setData({
-        time: Math.floor(backgroundAudioManager.duration),
-        audioLoad: false
-      })
-      this.drawCircle();
-      console.log(waiting)
-        clearTimeout(waiting)
-    })
-
-    
-    backgroundAudioManager.onPlay(() => {
-          // this.drawCircle()
+    const {play} = this.data;
+    if(play){
       this.loopRotate();
-    })
-    // backgroundAudioManager.onCanplay(() => {
-    //   console.log(backgroundAudioManager.duration)
-    // })
-    this.startAnimate()
- 
+    }
   },
-  // listenPause(){
-  //   let currentTime = backgroundAudioManager.currentTime;
-  //   this.setData({
-  //     currentTime: currentTime
-  //   })
-  //   this.startAnimate()
-  //   console.log(backgroundAudioManager.currentTime);
-  // },
+
   listenWaiting(){
     this.setData({
       audioLoad: true
@@ -208,7 +212,8 @@ Page({
     })
   },
   onHide() {
-    clearInterval(mediaAnimate)
+    // clearInterval(mediaAnimate)
+    this.stopAnimate();
   },
 
   onReady() {
@@ -285,26 +290,32 @@ Page({
       playCnName: NowSong.cn_name,
       playEnName: NowSong.en_name,
     })
-    console.log(playNum)
+    this.setBackgroundInfo(NowSong.cn_name, NowSong.cove)
     backgroundAudioManager.src = NowSong.source// 设置了 src 之后会自动播放 
-    // wx.seekBackgroundAudio(0);
-    // console.log(11)
   },
-
+  setBackgroundInfo(name,cove){
+    backgroundAudioManager.title = name;
+    backgroundAudioManager.epname = name;
+    backgroundAudioManager.coverImgUrl = cove;
+  },
   playAction(){
     this.setData({
       play: true,
       audioLoad: true
     })
     const {firstPlay} = this.data;
-    console.log(firstPlay)
     if(firstPlay){
-      console.log('fals')
       this.play();
     }else{
+      let { list, tabPlayNum, choose } = this.data;
+      let Num = tabPlayNum[choose];
+      let continuePlaySong = list[choose][Num];
+      this.setBackgroundInfo(continuePlaySong.cn_name, continuePlaySong.cover);
       backgroundAudioManager.play();
-      console.log('tru')
     }
+  },
+  pauseAction(){
+    this.pause();
   },
 
   /**
@@ -312,8 +323,8 @@ Page({
    */
   pause(firstPlay=false) {
     backgroundAudioManager.pause()
-    clearInterval(varName);
-    clearInterval(mediaAnimate);
+    // clearInterval(varName);
+    // clearInterval(mediaAnimate);
     this.setData({
       animation: this.animation.export()
     })
@@ -322,7 +333,6 @@ Page({
       firstPlay: firstPlay
     })
     this.stopAnimate();
-    // this.drawCircle(0,true)//重绘播放进度条
   },
   tabsAlbum(e){
     let tabID = e.target.dataset.id;
@@ -337,7 +347,6 @@ Page({
     if(!hasID){ 
       this.getList();
     }else{
-      // setTimeout(() => { this.play();},100)
       let { list, tabPlayNum, choose } = this.data;
       console.log(choose)
       let playNum = tabPlayNum[choose]
@@ -350,6 +359,7 @@ Page({
     }
     this.pause(true);
   },
+  
   /**
    * 切换音频
    */
