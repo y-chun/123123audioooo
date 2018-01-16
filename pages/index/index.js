@@ -25,6 +25,7 @@ Page({
     firstPlay:false,
     errorNum:0,
     playFlag:false,
+    onePlay:false
   },
 
   onLoad() {
@@ -53,13 +54,16 @@ Page({
       // console.log(waiting)
       clearTimeout(waiting)
     })
-
+    
+    // wx.onBackgroundAudioPause(()=>{
+    //   console.log('stop')
+    // })
 
     backgroundAudioManager.onPlay(() => {
       // this.drawCircle()
-      console.log(11);
-      const { playFlag} = this.data;
-
+     
+      const { playFlag,onePlay} = this.data;
+      
       if(playFlag){
         this.setData({
           playFlag:false
@@ -74,13 +78,16 @@ Page({
         })//待修改
        
       }
-      this.stopAnimate();
-      this.loopRotate();
-      this.setData({
-        play:true
-      })
-
-     
+      // this.stopAnimate();
+      // clearInterval(mediaAnimate);
+      if (onePlay){
+        console.log(12);
+        this.loopRotate();
+        this.setData({
+          play: true,
+          onePlay:false
+        })
+      }
     })
     // backgroundAudioManager.onCanplay(() => {
     //   console.log(backgroundAudioManager.duration)
@@ -229,6 +236,23 @@ Page({
     if(play){
       this.loopRotate();
     }
+    
+    
+    // this.stopAnimate();
+    // let isPlay = backgroundAudioManager.paused;
+    // if (!isPlay && isPlay != null) {
+    //   this.loopRotate();
+    //   this.setData({
+    //     play: !isPlay
+    //   })
+    // }
+    // if (isPlay) {
+    //   this.setData({
+    //     play: !isPlay
+    //   })
+    // }
+
+    console.log(backgroundAudioManager.paused)
   },
 
   listenWaiting(){
@@ -241,7 +265,7 @@ Page({
     //     title: '网络连接超时',
     //   })
     // },5000);
-  
+  console.log('wait')
   },
 
   startAnimate(){
@@ -335,7 +359,8 @@ Page({
       playImg: NowSong.cove,
       playCnName: NowSong.cn_name,
       playEnName: NowSong.en_name,
-      playFlag:true
+      playFlag:true,
+      onePlay:true
     })
     this.setBackgroundInfo(NowSong.cn_name, NowSong.cove);
 
@@ -357,11 +382,14 @@ Page({
     const {firstPlay} = this.data;
     if(firstPlay){
       this.play();
-      wx.reportAnalytics('start_play', {
-      });//上报开始播放数据
+      // wx.reportAnalytics('start_play', {
+      // });//上报开始播放数据
     }else{
-      wx.reportAnalytics('continue_play', {
-      });//上报继续播放数据
+      // wx.reportAnalytics('continue_play', {
+      // });//上报继续播放数据
+      this.setData({
+        onePlay: true
+      })
       backgroundAudioManager.play();
     }
   },
@@ -439,7 +467,8 @@ Page({
   },
 
   stopAnimate(){
-    clearInterval(mediaAnimate)
+    clearInterval(mediaAnimate);
+    console.log('srr')
     var animation = wx.createAnimation({
       duration: 0,
       timingFunction: 'step-end',
