@@ -3,6 +3,7 @@ var interval;
 var varName;
 var mediaAnimate;
 const backgroundAudioManager = wx.getBackgroundAudioManager();
+var animateNum = 1
 var waiting;
 Page({
   data: {
@@ -21,18 +22,22 @@ Page({
     model:"list",
     audioLoad:false,
     time:0,
-    firstPlay:false
+    firstPlay:false,
+    errorNum:0,
+    playFlag:false,
   },
 
   onLoad() {
-    wx.onNetworkStatusChange(this.listenNetworkStatusChange);
-    let that = this;
-    wx.getNetworkType({
-      success: function (res) {
-        let networkType = res.networkType;
-        that.netWorkTypeFun(networkType);
-      }
-    })
+    wx.reportAnalytics('start_num', {
+    });//上报启动次数
+    // wx.onNetworkStatusChange(this.listenNetworkStatusChange);
+    // let that = this;
+    // wx.getNetworkType({
+    //   success: function (res) {
+    //     let networkType = res.networkType;
+    //     that.netWorkTypeFun(networkType);
+    //   }
+    // })
     this.getList();
 
     backgroundAudioManager.onEnded(this.endNext);
@@ -52,18 +57,61 @@ Page({
 
     backgroundAudioManager.onPlay(() => {
       // this.drawCircle()
-      console.log(123);
+      console.log(11);
+      const { playFlag} = this.data;
+
+      if(playFlag){
+        this.setData({
+          playFlag:false
+        })
+        wx.getNetworkType({
+          success(res) {
+            var networkType = res.networkType;
+            wx.reportAnalytics('play_origin', {
+              origin: networkType,
+            });//上报播放来源数据
+          }
+        })//待修改
+       
+      }
       this.stopAnimate();
       this.loopRotate();
+      this.setData({
+        play:true
+      })
+
+     
     })
     // backgroundAudioManager.onCanplay(() => {
     //   console.log(backgroundAudioManager.duration)
     // })
     this.startAnimate()
   },
-  listenError(errCode){
-    console.log(errCode)
-    // let
+  listenError(info){
+    let {errorNum} = this.data;
+    let that = this;
+    if(errorNum){
+      wx.showModal({
+        title:'提示',
+        content: `播放失败，原因：${info.errCode}`,
+        confirmText:'刷新',
+        success(res) {
+          if (res.confirm) {
+            that.play()
+          }
+        }
+      })
+      this.setData({
+        errorNum:0
+      })
+    }else{
+      this.setData({
+        errorNum: 1
+      })
+      console.log(info)
+      // backgroundAudioManager.src = info.src// 设置了 src 之后会自动播放 
+     
+    }
   },
   listenNetworkStatusChange(params){
     const { isConnected, networkType} = params;
@@ -134,9 +182,9 @@ Page({
       }
     })
   },
+
   drawCircle(defualt=false){
     
-    // clearInterval(varName);
     var drawArc = (s, e) => {
       cxt_arc.setLineWidth(4);
       cxt_arc.setStrokeStyle('#d2d2d2');
@@ -159,29 +207,24 @@ Page({
       let drawStep  = backgroundAudioManager.currentTime;
       var n = this.data.time;
       if (drawStep <= n) {
-        console.log(drawStep)
           endAngle = drawStep * 2 * Math.PI / n + 1.5 * Math.PI;
           drawArc(startAngle, endAngle);  
-        // this.setData({
-        //   drawStep: drawStep+1
-        // });
-      } else {
-        clearInterval(varName);
-      }
+      } 
     };
     if (defualt){
-      // console.log(1)
       drawArc(startAngle, startAngle);
     }else{
-      // console.log(2)
       animation();
     }
     
   },
+
   onUnload(){
     backgroundAudioManager.pause()
   },
+
   onShow(e) {
+    this.stopAnimate();
     const {play} = this.data;
     if(play){
       this.loopRotate();
@@ -192,27 +235,27 @@ Page({
     this.setData({
       audioLoad: true
     })
-    clearTimeout(waiting)
-    waiting = setTimeout(function(){
-      wx.showLoading({
-        title: '网络连接超时',
-      })
-    },5000);
+    // clearTimeout(waiting)
+    // waiting = setTimeout(function(){
+    //   wx.showLoading({
+    //     title: '网络连接超时',
+    //   })
+    // },5000);
   
   },
+
   startAnimate(){
     this.animation = wx.createAnimation({
-      duration: 1400,
+      duration: 3000,
       timingFunction: 'linear',
       delay: 0,
-      transformOrigin: '50% 50% 0',
-      success: function (res) {
-
-      }
+      transformOrigin: '50% 50%',
     })
   },
+
   onHide() {
-    // clearInterval(mediaAnimate)
+    clearInterval(mediaAnimate)
+    clearTimeout(waiting)
     this.stopAnimate();
   },
 
@@ -237,8 +280,10 @@ Page({
       })
       
     }
-    clearInterval(varName);
-    clearInterval(mediaAnimate);
+    // clearInterval(varName);
+    // clearInterval(mediaAnimate);
+    wx.reportAnalytics('next', {
+    });//上报下一首数据
     this.stopAnimate();
     setTimeout(()=>{this.play();},100)
   },
@@ -247,12 +292,12 @@ Page({
    * 光盘旋转动画函数
    */
   loopRotate(){
-    clearInterval(mediaAnimate)
+    // clearInterval(mediaAnimate)
    
     this.setRouteAnimate()
     mediaAnimate = setInterval(() => {
       this.setRouteAnimate()
-    }, 1400)
+    }, 3000)
   },
 
   /**
@@ -260,7 +305,7 @@ Page({
    */
   rotateAni(n) {
     // console.log(n)
-    this.animation.rotate(180 * (n)).step()
+    this.animation.rotate(180 * (n)).step();
     this.setData({
       animation: this.animation.export()
     })
@@ -270,34 +315,40 @@ Page({
    * 连续光盘动画函数
    */
   setRouteAnimate() {
-    this.rotateAni(this.data.animateNum);
-    this.setData({
-      animateNum: this.data.animateNum + 1
-    })
+    this.rotateAni(animateNum);
+    // this.setData({
+    //   animateNum: this.data.animateNum + 1
+    // })
+    animateNum = animateNum+1
   },
 
   /**
    * 播放音频
    */
   play() {
-    clearInterval(mediaAnimate);
+    // console.log(2)
+    // clearInterval(mediaAnimate);
     let { list, tabPlayNum,choose} = this.data;
     let playNum = tabPlayNum[choose]
     let NowSong = list[choose][playNum]
     this.setData({
-      play:true,
       playImg: NowSong.cove,
       playCnName: NowSong.cn_name,
       playEnName: NowSong.en_name,
+      playFlag:true
     })
-    this.setBackgroundInfo(NowSong.cn_name, NowSong.cove)
+    this.setBackgroundInfo(NowSong.cn_name, NowSong.cove);
+
     backgroundAudioManager.src = NowSong.source// 设置了 src 之后会自动播放 
   },
+
+
   setBackgroundInfo(name,cove){
     backgroundAudioManager.title = name;
     backgroundAudioManager.epname = name;
     backgroundAudioManager.coverImgUrl = cove;
   },
+
   playAction(){
     this.setData({
       play: true,
@@ -306,11 +357,11 @@ Page({
     const {firstPlay} = this.data;
     if(firstPlay){
       this.play();
+      wx.reportAnalytics('start_play', {
+      });//上报开始播放数据
     }else{
-      let { list, tabPlayNum, choose } = this.data;
-      let Num = tabPlayNum[choose];
-      let continuePlaySong = list[choose][Num];
-      this.setBackgroundInfo(continuePlaySong.cn_name, continuePlaySong.cover);
+      wx.reportAnalytics('continue_play', {
+      });//上报继续播放数据
       backgroundAudioManager.play();
     }
   },
@@ -333,12 +384,14 @@ Page({
       firstPlay: firstPlay
     })
     this.stopAnimate();
+    wx.reportAnalytics('pause', {
+    });//上报暂停数据
   },
   tabsAlbum(e){
     let tabID = e.target.dataset.id;
     let {list,choose} = this.data;
     let hasID = Reflect.has(list, tabID);
-
+    
     this.setData({
       choose: tabID
     })
@@ -357,6 +410,10 @@ Page({
         playEnName: NowSong.en_name,
       })
     }
+    wx.reportAnalytics('column_num', {
+      id: tabID,
+    });//上报栏目点击次数数据
+    this.drawCircle(true);
     this.pause(true);
   },
   
@@ -374,7 +431,8 @@ Page({
     this.setData({
       tabPlayNum: tabPlayNum
     }); 
-
+    wx.reportAnalytics('next', {
+    });//上报下一首数据
     this.pause();
     setTimeout(() => { this.play();},100)
     
@@ -395,18 +453,24 @@ Page({
     this.setData({
       animation: animation.export()
     })
-    this.setData({
-      animateNum: 1
-    })
+    // this.setData({
+    //   animateNum: 1
+    // })
+    animateNum=1
   },
   
   switchOne(){
+    wx.reportAnalytics('loop_one', {
+    });//上报切换到单曲循环次数
     this.setData({
       model: 'one'
     });  
   },
 
   switchList(){
+    wx.reportAnalytics('loop_list', {
+      model: '',
+    });//上报切换到列表循环次数
     this.setData({
       model: 'list'
     });

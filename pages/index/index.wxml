@@ -28,8 +28,8 @@
   <view class="audio-operation-box">
     <view class="audio-operation">
 
-        <image src="../../images/list_icon.png" class="audio-model" wx:if="{{model==='list'}}" bindtap="switchOne"></image>
-        <image src="../../images/single_icon.png" class="audio-model" wx:if="{{model==='one'}}" bindtap="switchList"></image>
+        <image src="../../images/list_icon.png" class="audio-model" id="list-loop" wx:if="{{model==='list'}}" bindtap="switchOne"></image>
+        <image src="../../images/single_icon.png" class="audio-model" id="one-loop" wx:if="{{model==='one'}}" bindtap="switchList"></image>
       <!-- <image src="../../images/play_icon.png" ></image> -->
         <canvas class="cir" style="width:100px; height:100px;position:relative;" canvas-id="canvasArc">
            <cover-image class="audio-operation-btn" src="../../images/play_icon.png"  bindtap="playAction" hidden="{{play}}"/> 
