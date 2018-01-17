@@ -14,10 +14,10 @@
     <image src="../../images/background.png" class="audio-media-bg"></image>
     <view class="audio-image-box" animation="{{animation}}">
       <image src="../../images/cd_bg.png" class="cd-bg"></image>
-      <image src="{{playImg}}"class="audio-cover"></image>
+      <image src="{{nowSong.cove}}"class="audio-cover"></image>
     </view>
-    <view class="audio-name">{{playCnName}}</view>
-    <view class="audio-detail">{{playEnName}}</view>
+    <view class="audio-name">{{nowSong.cn_name}}</view>
+    <view class="audio-detail">{{nowSong.en_name}}</view>
   </view>
   <view class="audio-load">
     <view class="audio-load-ele" wx:if="{{audioLoad}}">

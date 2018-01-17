@@ -7,40 +7,31 @@ var animateNum = 1
 var waiting;
 Page({
   data: {
-    list: {},
-    choose:'',
+    list: {},//数据列表
+    choose:'',//当前选择tab id
     animation: '',
-    animateNum: 1,
-    size: 1,
-    play:false,
-    tabs:[],
-    nowSong:{},
-    tabPlayNum:{},
-    playImg:"",
-    playCnName:"",
-    playEnName:"",
-    model:"list",
-    audioLoad:false,
+    animateNum: 1,//旋转圈数
+    // size: 1,
+    play:false,//播放状态
+    tabs:[],//tab列表
+    nowSong:{
+    },
+    tabPlayNum:{},//记录每个列表播放到哪个歌曲
+    model:'list',//当前模式
+    audioLoad:false,//歌曲加载标志
     time:0,
-    firstPlay:false,
-    errorNum:0,
-    playFlag:false,
-    onePlay:false
+    firstPlay:false,//判断歌曲是否第一次播放
+    errorNum: 0,//歌曲加载失败次数
+    playFlag: false,//歌曲第一次播放标志
+    onePlay:false,//用来限制onPlay事件触发内容次数
   },
 
   onLoad() {
     wx.reportAnalytics('start_num', {
     });//上报启动次数
-    // wx.onNetworkStatusChange(this.listenNetworkStatusChange);
-    // let that = this;
-    // wx.getNetworkType({
-    //   success: function (res) {
-    //     let networkType = res.networkType;
-    //     that.netWorkTypeFun(networkType);
-    //   }
-    // })
-    this.getList();
 
+    this.getList();
+    wx.onNetworkStatusChange(this.listenNetworkStatusChange);
     backgroundAudioManager.onEnded(this.endNext);
     backgroundAudioManager.onPause(this.listenPause);
     backgroundAudioManager.onWaiting(this.listenWaiting);
@@ -51,23 +42,23 @@ Page({
         audioLoad: false
       })
       this.drawCircle();
-      // console.log(waiting)
       clearTimeout(waiting)
     })
-    
-    // wx.onBackgroundAudioPause(()=>{
-    //   console.log('stop')
-    // })
 
     backgroundAudioManager.onPlay(() => {
       // this.drawCircle()
      
-      const { playFlag,onePlay} = this.data;
+      const { playFlag, onePlay, choose, nowSong} = this.data;
       
       if(playFlag){
         this.setData({
           playFlag:false
         })
+        wx.reportAnalytics('play_success', {
+          id: choose,
+          song_name: nowSong.cn_name,
+        });
+
         wx.getNetworkType({
           success(res) {
             var networkType = res.networkType;
@@ -81,7 +72,6 @@ Page({
       // this.stopAnimate();
       // clearInterval(mediaAnimate);
       if (onePlay){
-        console.log(12);
         this.loopRotate();
         this.setData({
           play: true,
@@ -89,11 +79,12 @@ Page({
         })
       }
     })
-    // backgroundAudioManager.onCanplay(() => {
-    //   console.log(backgroundAudioManager.duration)
-    // })
     this.startAnimate()
   },
+
+  /**
+   * 判断网络错误
+   */
   listenError(info){
     let {errorNum} = this.data;
     let that = this;
@@ -107,19 +98,35 @@ Page({
             that.play()
           }
         }
-      })
+      });
+      
       this.setData({
         errorNum:0
-      })
+      });
+
+      wx.reportAnalytics('play_error_two', {
+      });//上报第二次播放失败数据
+
     }else{
       this.setData({
         errorNum: 1
       })
       console.log(info)
+
+      wx.reportAnalytics('play_error_one', {
+      });//上报第一次播放失败数据
+      
       // backgroundAudioManager.src = info.src// 设置了 src 之后会自动播放 
-     
     }
+
+    wx.reportAnalytics('play_error_code', {
+      errcode: info.errCode,
+    });//上报播放失败原因
   },
+
+  /**
+   * 监听网络状态
+   */
   listenNetworkStatusChange(params){
     const { isConnected, networkType} = params;
     if (!isConnected){
@@ -132,14 +139,20 @@ Page({
     setTimeout(() => { wx.hideLoading()},3000)
   },
   
+  /**
+   * 判断网络慢并提示
+   */
   netWorkTypeFun(networkType){
-    if (networkType === '2g' || networkType === '3g') {
+    if (networkType === '2g') {
       wx.showLoading({
         title: '当前网络慢',
       })
     }
   },
 
+  /**
+   * 获取歌曲列表
+   */
   getList(){
     wx.showLoading({
       title:'加载中',
@@ -171,14 +184,13 @@ Page({
           tabs: tabs,
           list: list,
           tabPlayNum: tabPlayNum,
-          playImg: NowSong.cove,
-          playCnName: NowSong.cn_name,
-          playEnName: NowSong.en_name,
+          nowSong:NowSong,
           firstPlay:true
         });
         wx.hideLoading();
         that.drawCircle(true)
         // that.play();
+        console.log(that.data.nowSong)
       },
       fail(){
         wx.hideLoading();
@@ -190,6 +202,9 @@ Page({
     })
   },
 
+  /**
+   * 绘制进度条
+   */
   drawCircle(defualt=false){
     
     var drawArc = (s, e) => {
@@ -230,6 +245,9 @@ Page({
     backgroundAudioManager.pause()
   },
 
+  /**
+   * 界面显示调用
+   */
   onShow(e) {
     this.stopAnimate();
     const {play} = this.data;
@@ -251,10 +269,13 @@ Page({
     //     play: !isPlay
     //   })
     // }
-
-    console.log(backgroundAudioManager.paused)
+    // setTimeout(() => { console.log(backgroundAudioManager.paused)},100);
+    
   },
 
+  /**
+   * 播放等待
+   */
   listenWaiting(){
     this.setData({
       audioLoad: true
@@ -268,6 +289,9 @@ Page({
   console.log('wait')
   },
 
+  /**
+   * 初始化转盘动画
+   */
   startAnimate(){
     this.animation = wx.createAnimation({
       duration: 3000,
@@ -277,6 +301,9 @@ Page({
     })
   },
 
+  /**
+   * 界面隐藏调用函数 
+   */
   onHide() {
     clearInterval(mediaAnimate)
     clearTimeout(waiting)
@@ -290,26 +317,28 @@ Page({
    * 音频结束回调函数 
    */
   endNext(){
-    let { model, tabPlayNum,choose,list} = this.data;
-    let nextPlayNum = tabPlayNum[choose];
+    let { model, tabPlayNum, choose, list, nowSong} = this.data;
+    let getPlayNum = tabPlayNum[choose];
     let nextListLength = list[choose].length-1;
+
     if(model==='list'){
-      if (nextPlayNum == nextListLength){
+      if (getPlayNum == nextListLength){
         tabPlayNum[choose] = 0;
       }else{
-        tabPlayNum[choose] = nextPlayNum + 1;
+        tabPlayNum[choose] = getPlayNum + 1;
       }
       this.setData({
         tabPlayNum: tabPlayNum
-      })
-      
+      });
     }
-    // clearInterval(varName);
-    // clearInterval(mediaAnimate);
-    wx.reportAnalytics('next', {
-    });//上报下一首数据
+
     this.stopAnimate();
-    setTimeout(()=>{this.play();},100)
+    setTimeout(()=>{this.play();},100);
+
+    wx.reportAnalytics('play_end', {
+      id: choose,
+      song_name: nowSong.cn_name,
+    });
   },
 
   /**
@@ -353,12 +382,10 @@ Page({
     // console.log(2)
     // clearInterval(mediaAnimate);
     let { list, tabPlayNum,choose} = this.data;
-    let playNum = tabPlayNum[choose]
-    let NowSong = list[choose][playNum]
+    let playNum = tabPlayNum[choose];
+    let NowSong = list[choose][playNum];
     this.setData({
-      playImg: NowSong.cove,
-      playCnName: NowSong.cn_name,
-      playEnName: NowSong.en_name,
+      nowSong: NowSong,
       playFlag:true,
       onePlay:true
     })
@@ -382,17 +409,18 @@ Page({
     const {firstPlay} = this.data;
     if(firstPlay){
       this.play();
-      // wx.reportAnalytics('start_play', {
-      // });//上报开始播放数据
+      wx.reportAnalytics('start_play', {
+      });//上报开始播放数据
     }else{
-      // wx.reportAnalytics('continue_play', {
-      // });//上报继续播放数据
+      wx.reportAnalytics('continue_play', {
+      });//上报继续播放数据
       this.setData({
         onePlay: true
       })
       backgroundAudioManager.play();
     }
   },
+
   pauseAction(){
     this.pause();
   },
@@ -415,6 +443,7 @@ Page({
     wx.reportAnalytics('pause', {
     });//上报暂停数据
   },
+  
   tabsAlbum(e){
     let tabID = e.target.dataset.id;
     let {list,choose} = this.data;
@@ -429,13 +458,11 @@ Page({
       this.getList();
     }else{
       let { list, tabPlayNum, choose } = this.data;
-      console.log(choose)
+
       let playNum = tabPlayNum[choose]
       let NowSong = list[choose][playNum];
       this.setData({
-        playImg: NowSong.cove,
-        playCnName: NowSong.cn_name,
-        playEnName: NowSong.en_name,
+        nowSong: NowSong
       })
     }
     wx.reportAnalytics('column_num', {
@@ -466,9 +493,11 @@ Page({
     
   },
 
+  /**
+   * 清空转盘动画
+   */
   stopAnimate(){
     clearInterval(mediaAnimate);
-    console.log('srr')
     var animation = wx.createAnimation({
       duration: 0,
       timingFunction: 'step-end',
@@ -488,6 +517,9 @@ Page({
     animateNum=1
   },
   
+  /**
+   * 切换到单曲循环
+   */
   switchOne(){
     wx.reportAnalytics('loop_one', {
     });//上报切换到单曲循环次数
@@ -496,9 +528,11 @@ Page({
     });  
   },
 
+  /**
+   * 切换到列表循环
+   */
   switchList(){
     wx.reportAnalytics('loop_list', {
-      model: '',
     });//上报切换到列表循环次数
     this.setData({
       model: 'list'
