@@ -48,7 +48,7 @@ Page({
         })
       }
     })
-    this.getList('https://easy-mock.com/mock/59f8115cffe61f7a1d987d2b/newapp/list');
+    this.getList('https://penear.babybus.com/api/player/?platform=1&ctv=1.0.0');
     wx.onNetworkStatusChange(this.listenNetworkStatusChange);
     backgroundAudioManager.onEnded(this.endNext);
     backgroundAudioManager.onPause(this.listenPause);
@@ -196,7 +196,7 @@ Page({
         let { tabs, album, defaultTabId } = res.data.body;
         let { list, choose, tabPlayNum } = that.data;
         let chooseID = '';
-        if (choose=='') {
+        if (choose!='') {
           chooseID = choose;
         } else {
           that.setData({
@@ -336,7 +336,7 @@ Page({
    */
   startAnimate() {
     this.animation = wx.createAnimation({
-      duration: 3000,
+      duration: 4000,
       timingFunction: 'linear',
       delay: 0,
       transformOrigin: '50% 50%',
@@ -392,7 +392,7 @@ Page({
     this.setRouteAnimate()
     mediaAnimate = setInterval(() => {
       this.setRouteAnimate()
-    }, 3000)
+    }, 4000)
   },
 
   /**

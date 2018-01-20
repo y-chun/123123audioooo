@@ -66,6 +66,7 @@
 
 .cd-bg {
   position: absolute;
+  left: 0;
   width: 476rpx;
   height: 476rpx;
   z-index: 0;
